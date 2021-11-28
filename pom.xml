@@ -63,7 +63,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <imageName>spider/${project.artifactId}:${project.version}</imageName>
+                    <imageName>${project.artifactId}:${project.version}</imageName>
                     <dockerHost>http://172.18.119.247:2375</dockerHost>
                     <baseImage>adoptopenjdk/openjdk11:ubi</baseImage>
                     <entryPoint>["java", "-jar","/${project.build.finalName}.jar"]
