@@ -64,7 +64,7 @@
                 </executions>
                 <configuration>
                     <imageName>spider/${project.artifactId}:${project.version}</imageName>
-                    <dockerHost>http://127.0.0.1:2375</dockerHost>
+                    <dockerHost>http://120.79.254.44:2375</dockerHost>
                     <baseImage>java:11</baseImage>
                     <entryPoint>["java", "-jar","/${project.build.finalName}.jar"]
                     </entryPoint>
