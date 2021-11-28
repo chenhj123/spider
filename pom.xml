@@ -14,7 +14,7 @@
     <name>spider</name>
     <description>spider</description>
     <properties>
-        <java.version>openjdk:11</java.version>
+        <java.version>11</java.version>
     </properties>
     <dependencies>
         <dependency>
@@ -65,7 +65,7 @@
                 <configuration>
                     <imageName>spider/${project.artifactId}:${project.version}</imageName>
                     <dockerHost>http://172.18.119.247:2375</dockerHost>
-                    <baseImage>openjdk:11</baseImage>
+                    <baseImage>11.0.13-jdk-oraclelinux8</baseImage>
                     <entryPoint>["java", "-jar","/${project.build.finalName}.jar"]
                     </entryPoint>
                     <resources>
