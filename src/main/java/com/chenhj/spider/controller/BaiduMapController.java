@@ -10,6 +10,7 @@ import com.chenhj.spider.service.BaiduMapService;
 import com.chenhj.spider.utils.HttpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.ServletOutputStream;
@@ -31,7 +32,7 @@ public class BaiduMapController {
         this.baiduMapService = baiduMapService;
     }
 
-    @RequestMapping("/map")
+    @RequestMapping(value = "/map", method = RequestMethod.POST)
     public void map(HttpServletResponse response, String url){
         String data = HttpUtil.doGet(url);
         BaiduMap content = JSONUtil.toBean(data, BaiduMap.class);
