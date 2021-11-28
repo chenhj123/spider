@@ -14,7 +14,7 @@
     <name>spider</name>
     <description>spider</description>
     <properties>
-        <java.version>11</java.version>
+        <java.version>openjdk:11</java.version>
     </properties>
     <dependencies>
         <dependency>
