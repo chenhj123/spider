@@ -51,23 +51,30 @@
             </plugin>
             <plugin>
                 <groupId>com.spotify</groupId>
-                <artifactId>dockerfile-maven-plugin</artifactId>
-                <version>1.4.13</version>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.2.2</version>
                 <executions>
                     <execution>
-                        <id>default</id>
+                        <id>build-image</id>
+                        <phase>package</phase>
                         <goals>
                             <goal>build</goal>
-                            <goal>push</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <repository>${project.artifactId}</repository>
-                    <tag>${project.version}</tag>
-                    <buildArgs>
-                        <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
-                    </buildArgs>
+                    <imageName>spider/${project.artifactId}:${project.version}</imageName>
+                    <dockerHost>http://172.18.119.247:2375</dockerHost>
+                    <baseImage>adoptopenjdk/openjdk11:ubi</baseImage>
+                    <entryPoint>["java", "-jar","/${project.build.finalName}.jar"]
+                    </entryPoint>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
                 </configuration>
             </plugin>
         </plugins>
