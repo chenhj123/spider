@@ -65,7 +65,7 @@
                 <configuration>
                     <imageName>spider/${project.artifactId}:${project.version}</imageName>
                     <dockerHost>http://172.18.119.247:2375</dockerHost>
-                    <baseImage>java:11</baseImage>
+                    <baseImage>openjdk:11</baseImage>
                     <entryPoint>["java", "-jar","/${project.build.finalName}.jar"]
                     </entryPoint>
                     <resources>
