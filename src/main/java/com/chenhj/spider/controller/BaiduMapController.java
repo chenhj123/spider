@@ -1,6 +1,5 @@
 package com.chenhj.spider.controller;
 
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
@@ -37,7 +36,7 @@ public class BaiduMapController {
         String data = HttpUtil.doGet(url);
         BaiduMap content = JSONUtil.toBean(data, BaiduMap.class);
 
-        List<BaiduMapExcel> row = content.getContent().stream().map(baiduMapService::mapDataToMapExcel).collect(Collectors.toList());
+        List<BaiduMapExcel> row = content.getContent().stream().filter(element -> element.getApiAdminInfo() != null).map(baiduMapService::mapDataToMapExcel).collect(Collectors.toList());
 
         ExcelWriter writer = ExcelUtil.getWriter(true);
         writer.addHeaderAlias("provinceName", "省")

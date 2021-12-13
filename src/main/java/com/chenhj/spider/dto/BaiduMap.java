@@ -10,12 +10,12 @@ public class BaiduMap {
 
     private List<Content> content;
 
-     public static class Content{
+    public static class Content {
         private String addr;
         private String name;
         private ApiAdminInfo apiAdminInfo;
 
-        public static class ApiAdminInfo{
+        public static class ApiAdminInfo {
             private String provName;
             private String cityName;
             private String areaName;
