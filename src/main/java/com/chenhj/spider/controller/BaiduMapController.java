@@ -1,8 +1,8 @@
 package com.chenhj.spider.controller;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
-import cn.hutool.poi.excel.ExcelUtil;
-import cn.hutool.poi.excel.ExcelWriter;
+import com.alibaba.excel.EasyExcel;
 import com.chenhj.spider.dto.BaiduMap;
 import com.chenhj.spider.dto.BaiduMapExcel;
 import com.chenhj.spider.service.BaiduMapService;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
@@ -38,23 +37,13 @@ public class BaiduMapController {
 
         List<BaiduMapExcel> row = content.getContent().stream().filter(element -> element.getApiAdminInfo() != null).map(baiduMapService::mapDataToMapExcel).collect(Collectors.toList());
 
-        ExcelWriter writer = ExcelUtil.getWriter(true);
-        writer.addHeaderAlias("provinceName", "省")
-                .addHeaderAlias("cityName", "市")
-                .addHeaderAlias("areaName", "区")
-                .addHeaderAlias("name", "场地名称")
-                .addHeaderAlias("address", "详细地址")
-                .write(row, true);
-
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
-        response.setHeader("Content-Disposition","attachment;filename=test.xlsx");
-        ServletOutputStream out = null;
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-disposition", "attachment;filename=" + DateUtil.format(DateUtil.date(),"yyyyMMddHHmmss") + ".xlsx");
         try {
-            out = response.getOutputStream();
+            EasyExcel.write(response.getOutputStream(), BaiduMapExcel.class).sheet("模板").doWrite(row);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        writer.flush(out, true);
-        writer.close();
     }
 }
