@@ -9,24 +9,42 @@ import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.io.FileUtils;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.json.JSONUtil;
+import com.baidu.aip.ocr.AipOcr;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 
+/**
+ * @author chenhj
+ */
 public class OrcUtil {
 
 	private static final Log log = LogFactory.getLog(OrcUtil.class);
-	
+    private static final String IN_PATH = "";
+    private static final String OUT_PATH = "";
+
     /**
      * baidu orc 帐号资源枚举
      * @author xd
-     *
      */
     private enum ApiAccount {
-    	private String appId;
-    	private String apiKey;
-    	private String secretKey;
+        /**
+         * 石总
+         */
+        SHIBIN("", "", ""),
+
+        /**
+         * 波总
+         */
+        HEZHENBO("", "", "");
+
+    	private final String appId;
+    	private final String apiKey;
+    	private final String secretKey;
     	ApiAccount(String appId, String apiKey, String secretKey) {
     		this.appId = appId;
     		this.apiKey = apiKey;
@@ -43,58 +61,49 @@ public class OrcUtil {
 		}
     }
 
-    private final String inPath = com.caihui.tcps.common.dto.File.UPDATE_TEMP_PATH + com.caihui.tcps.common.dto.File.UPDATE_TEMP_IMAGE_PATH;// 下载的验证码路径
-    private final String outPath = com.caihui.tcps.common.dto.File.UPDATE_TEMP_PATH + com.caihui.tcps.common.dto.File.UPDATE_TEMP_IMAGE_PATH;// 返回图片
-
-
     /**
      * 获取验证码
-     * @param result
-     * 			base64图片数据
-     * @return
-     * @throws IOException
+     * @param result base64图片数据
+     * @return 验证码
      */
-    public String getverifyCode(String result) throws IOException {
+    public String getVerifyCode(String result) throws IOException {
         String code = "";
         String s = result.split("\"image\":\"")[1].split("\"")[0];
               
         URL base = Thread.currentThread().getContextClassLoader().getResource("");
         String basePath = new File(base.getFile(), "../../").getCanonicalPath();
         
-        String in = basePath + inPath + DateUtil.getNowDateYYYYMMDDHHMMSSSS() + ".jpg";
-        String out = basePath + outPath + DateUtil.getNowDateYYYYMMDDHHMMSSSS() + ".jpg";
-        Boolean b = generateImage(s, in);
+        String in = basePath + IN_PATH + DateUtil.format(DateUtil.date(), "yyyyMMddHHmmssSSS") + ".jpg";
+        String out = basePath + OUT_PATH + DateUtil.format(DateUtil.date(), "yyyyMMddHHmmssSSS") + ".jpg";
+//        Boolean b = generateImage(s, in);
         
-        if (b) {
-            code = orcResult(in, out, Boolean.TRUE);
-        }
+//        if (b) {
+//            code = orcResult(in, out, Boolean.TRUE);
+//        }
         return code;
     }
 
     /**
      * 获取验证码
-     * @param bytes
-     * 			图片字节数组
-     * @param suffix
-     * 			图片后缀
-     * @return
-     * @throws IOException
+     * @param bytes  图片字节数组
+     * @param suffix 图片后缀
+     * @return 验证码
      */
-    public String getverifyCode(byte[] bytes, String suffix) throws IOException, Exception {
+    public String getVerifyCode(byte[] bytes, String suffix) throws IOException, Exception {
     	URL base = Thread.currentThread().getContextClassLoader().getResource("");
         String basePath = new File(base.getFile(), "../../").getCanonicalPath();
         basePath = basePath.replaceAll("%20", " ");
-        String in = basePath + inPath + DateUtil.getNowDateYYYYMMDDHHMMSSSS() + "." + suffix;
-        String out = basePath + outPath + DateUtil.getNowDateYYYYMMDDHHMMSSSS() + "." + suffix;
+        String in = basePath + IN_PATH + DateUtil.format(DateUtil.date(), "yyyyMMddHHmmssSSS") + "." + suffix;
+        String out = basePath + OUT_PATH + DateUtil.format(DateUtil.date(), "yyyyMMddHHmmssSSS") + "." + suffix;
 
-        this.ByteToFile(bytes, in);
+        this.byteToFile(bytes, in);
         String code = orcResult(in, out, Boolean.FALSE);
-        FileUtils.forceDeleteOnExit(new File(in));
-        FileUtils.forceDeleteOnExit(new File(out));
+        FileUtil.del(new File(in));
+        FileUtil.del(new File(out));
         return code;
     }
     
-    private void ByteToFile(byte[] bytes, String fileName) throws Exception { 
+    private void byteToFile(byte[] bytes, String fileName) throws Exception {
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);   
         BufferedImage bi1 =ImageIO.read(bais); 
         try {   
@@ -107,27 +116,27 @@ public class OrcUtil {
         }
     }
 
-    public String orcResult(String OriginalImg, String outImg, Boolean cuttingImg) {
+    public String orcResult(String originalImg, String outImg, Boolean cuttingImg) {
         //去噪点
-        ImgUtils.removeBackground(OriginalImg, outImg);
-        if(cuttingImg) {
+//        ImgUtils.removeBackground(OriginalImg, outImg);
+//        if(cuttingImg) {
         	 //裁剪边角
-            ImgUtils.cuttingImg(outImg);
-        }
+//            ImgUtils.cuttingImg(outImg);
+//        }
         //调用api
         String result = orcApiResult(outImg);
         return result;
     }
 
-    private String orcApiResult(String Img) {
+    private String orcApiResult(String img) {
     	try {
     		for (ApiAccount o : ApiAccount.values()) {
         		AipOcr client = new AipOcr(o.getAppId(), o.getApiKey(), o.getSecretKey());
         		HashMap<String, String> options = new HashMap<String, String>();
-        		JSONObject res = client.basicGeneral(Img, options);
+        		JSONObject res = client.basicGeneral(img, options);
         		// qps受限，切换帐号资源
-        		if (res.toString().indexOf("error_code") > -1) {
-        			log.error("ORC 图片识别失败，response=" + res.toString() + "，帐号信息：" + new Gson().toJson(o));
+        		if (res.toString().contains("error_code")) {
+        			log.error("ORC 图片识别失败，response=" + res.toString() + "，帐号信息：" + JSONUtil.toJsonStr(o));
         			continue;
         		}
         		return res.toString().split("\"words\":\"")[1].split("\"}],")[0];
